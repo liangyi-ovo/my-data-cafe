@@ -1,0 +1,2262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的数据小馆 | pk</title>
+  <style>
+    /* =========================
+       基础变量：后续改色主要调整这里
+    ========================= */
+    :root {
+      --bg: #071018;
+      --bg-2: #0b1722;
+      --panel: rgba(13, 28, 42, 0.62);
+      --panel-strong: rgba(12, 24, 36, 0.82);
+      --line: rgba(147, 197, 253, 0.22);
+      --main: #35c8ff;
+      --main-soft: #7dd3fc;
+      --text: #eef7ff;
+      --muted: #9fb4c7;
+      --silver: #d7e4ee;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+      --radius: 8px;
+      --nav-h: 68px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+      background:
+        linear-gradient(180deg, #030911 0%, #06111a 44%, #07131d 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(125, 211, 252, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(125, 211, 252, 0.035) 1px, transparent 1px);
+      background-size: 58px 58px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.42) 58%, transparent 100%);
+      z-index: -2;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at 50% 48%, rgba(53, 200, 255, 0.16), rgba(53, 200, 255, 0.055) 24%, transparent 58%),
+        radial-gradient(ellipse at 48% 54%, rgba(215, 228, 238, 0.08), transparent 34%);
+      z-index: -1;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* =========================
+       顶部固定导航
+    ========================= */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-h);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 12, 19, 0.68);
+      border-bottom: 1px solid rgba(125, 211, 252, 0.16);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .nav-inner {
+      width: min(1180px, calc(100% - 40px));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: var(--silver);
+      white-space: nowrap;
+    }
+
+    .brand span {
+      color: var(--main);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-links a {
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      color: var(--muted);
+      font-size: 14px;
+      transition: color 0.25s ease, background 0.25s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--text);
+      background: rgba(53, 200, 255, 0.11);
+    }
+
+    /* =========================
+       页面区块通用布局
+    ========================= */
+    section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: calc(var(--nav-h) + 56px) 24px 72px;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .section-inner {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+    }
+
+    .section-kicker {
+      color: var(--main-soft);
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: clamp(32px, 5vw, 58px);
+      letter-spacing: 0.08em;
+      line-height: 1.16;
+      color: var(--text);
+      margin-bottom: 26px;
+    }
+
+    /* =========================
+       首屏 Hero：渐变背景 + 流动 K 线、代码、相机线稿
+    ========================= */
+    .hero {
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(8px);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .hero::before {
+      width: 42vw;
+      height: 42vw;
+      min-width: 320px;
+      min-height: 320px;
+      left: -12vw;
+      top: 18vh;
+      background: radial-gradient(circle, rgba(53, 200, 255, 0.2), transparent 66%);
+    }
+
+    .hero::after {
+      width: 34vw;
+      height: 34vw;
+      min-width: 260px;
+      min-height: 260px;
+      right: -10vw;
+      bottom: 10vh;
+      background: radial-gradient(circle, rgba(167, 219, 255, 0.16), transparent 68%);
+    }
+
+    .bg-slider {
+      position: absolute;
+      inset: 0;
+      z-index: -4;
+    }
+
+    .bg-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      animation: fadeSlide 15s infinite;
+      background:
+        linear-gradient(rgba(7, 16, 24, 0.54), rgba(7, 16, 24, 0.72)),
+        var(--slide-color);
+    }
+
+    .bg-slide:nth-child(1) {
+      --slide-color: linear-gradient(135deg, rgba(15, 48, 70, 0.78), rgba(2, 12, 20, 0.92));
+      animation-delay: 0s;
+    }
+
+    .bg-slide:nth-child(2) {
+      --slide-color: linear-gradient(135deg, rgba(16, 64, 86, 0.74), rgba(8, 18, 32, 0.94));
+      animation-delay: 5s;
+    }
+
+    .bg-slide:nth-child(3) {
+      --slide-color: linear-gradient(135deg, rgba(39, 56, 78, 0.76), rgba(4, 14, 24, 0.94));
+      animation-delay: 10s;
+    }
+
+    @keyframes fadeSlide {
+      0%, 100% { opacity: 0; }
+      8%, 33% { opacity: 1; }
+      43% { opacity: 0; }
+    }
+
+    .hero-visuals {
+      position: absolute;
+      inset: 0;
+      z-index: -3;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0.74;
+    }
+
+    .hero-visuals::before {
+      content: "";
+      position: absolute;
+      inset: 12% 5%;
+      background:
+        linear-gradient(90deg, transparent, rgba(53, 200, 255, 0.08), transparent),
+        linear-gradient(rgba(125, 211, 252, 0.08) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 72px;
+      filter: blur(0.2px);
+      mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+      animation: scanFlow 9s ease-in-out infinite alternate;
+    }
+
+    .kline-candle {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: 2px;
+      height: var(--h);
+      opacity: var(--o, 0.38);
+      animation: candleFlow var(--d) linear infinite;
+      animation-delay: var(--delay);
+    }
+
+    .kline-candle::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: currentColor;
+      box-shadow: 0 0 18px currentColor;
+    }
+
+    .kline-candle::after {
+      content: "";
+      position: absolute;
+      left: -5px;
+      top: var(--body-y);
+      width: 12px;
+      height: var(--body);
+      border: 1px solid currentColor;
+      box-shadow: 0 0 18px currentColor;
+    }
+
+    .kline-candle.up {
+      color: rgba(56, 255, 192, 0.86);
+    }
+
+    .kline-candle.up::after {
+      background: rgba(56, 255, 192, 0.28);
+    }
+
+    .kline-candle.down {
+      color: rgba(255, 82, 116, 0.78);
+    }
+
+    .kline-candle.down::after {
+      background: rgba(255, 82, 116, 0.24);
+    }
+
+    .code-stream {
+      position: absolute;
+      top: var(--top);
+      left: var(--left);
+      font-family: Consolas, "SFMono-Regular", "Microsoft YaHei", monospace;
+      font-size: clamp(12px, 1.2vw, 17px);
+      color: rgba(215, 228, 238, var(--alpha, 0.24));
+      white-space: nowrap;
+      text-shadow: 0 0 18px rgba(53, 200, 255, 0.24);
+      animation: codeFlow var(--dur) linear infinite;
+      animation-delay: var(--delay);
+    }
+
+    .camera-sketch,
+    .stereo-camera {
+      position: absolute;
+      color: rgba(215, 228, 238, 0.24);
+      filter: drop-shadow(0 0 22px rgba(53, 200, 255, 0.18));
+    }
+
+    .camera-sketch {
+      right: clamp(8px, 3vw, 72px);
+      top: clamp(74px, 10vh, 128px);
+      width: clamp(190px, 22vw, 390px);
+      animation: cameraDrift 8s ease-in-out infinite alternate;
+    }
+
+    .stereo-camera {
+      left: clamp(-30px, 4vw, 82px);
+      bottom: clamp(24px, 8vh, 82px);
+      width: clamp(230px, 26vw, 460px);
+      opacity: 0.76;
+      transform-origin: 48% 55%;
+      animation: stereoDrift 9s ease-in-out infinite alternate;
+    }
+
+    .camera-sketch svg,
+    .stereo-camera svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .camera-sketch img,
+    .stereo-camera img {
+      width: 100%;
+      height: auto;
+      display: block;
+      mix-blend-mode: screen;
+      filter:
+        brightness(1.28)
+        contrast(1.46)
+        saturate(1.24)
+        drop-shadow(0 0 26px rgba(53, 200, 255, 0.34));
+    }
+
+    .camera-sketch img {
+      mask-image: radial-gradient(ellipse at 50% 52%, #000 58%, rgba(0, 0, 0, 0.72) 78%, transparent 100%);
+    }
+
+    .stereo-camera img {
+      mask-image: radial-gradient(ellipse at 50% 55%, #000 52%, rgba(0, 0, 0, 0.76) 72%, transparent 100%);
+    }
+
+    .camera-sketch path,
+    .camera-sketch circle,
+    .camera-sketch rect,
+    .stereo-camera path,
+    .stereo-camera circle,
+    .stereo-camera rect {
+      vector-effect: non-scaling-stroke;
+    }
+
+    @keyframes scanFlow {
+      from { transform: translateY(-18px); opacity: 0.55; }
+      to { transform: translateY(22px); opacity: 0.9; }
+    }
+
+    @keyframes candleFlow {
+      from { transform: translate3d(18vw, 12px, 0); }
+      to { transform: translate3d(-24vw, -18px, 0); }
+    }
+
+    @keyframes codeFlow {
+      from { transform: translateX(10vw); opacity: 0; }
+      12%, 72% { opacity: 1; }
+      to { transform: translateX(-36vw); opacity: 0; }
+    }
+
+    @keyframes cameraDrift {
+      from { transform: translate3d(0, -8px, 0) rotate(-2deg); opacity: 0.36; }
+      to { transform: translate3d(-18px, 14px, 0) rotate(1deg); opacity: 0.58; }
+    }
+
+    @keyframes stereoDrift {
+      from { transform: translate3d(0, 12px, 0) rotate(2deg) skewY(-3deg); opacity: 0.34; }
+      to { transform: translate3d(18px, -10px, 0) rotate(-1deg) skewY(-1deg); opacity: 0.62; }
+    }
+
+    .hero-content {
+      width: min(1400px, 96vw);
+      max-width: none;
+      margin: 0 auto;
+      padding-top: 24px;
+    }
+
+    .hero-title {
+      font-size: clamp(32px, 5.4vw, 88px);
+      line-height: 1.08;
+      letter-spacing: 0.055em;
+      white-space: nowrap;
+      font-weight: 800;
+      font-style: italic;
+      color: #f4fbff;
+      text-shadow: 0 0 34px rgba(53, 200, 255, 0.24);
+    }
+
+    .hero-subtitle {
+      margin-top: 20px;
+      font-size: clamp(20px, 3vw, 34px);
+      letter-spacing: 0.14em;
+      color: var(--silver);
+      font-family: "Segoe UI Light", "Microsoft YaHei UI Light", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-weight: 300;
+    }
+
+    .hero-line {
+      width: min(460px, 72vw);
+      height: 1px;
+      margin: 32px auto 26px;
+      background: linear-gradient(90deg, transparent, rgba(53, 200, 255, 0.8), transparent);
+    }
+
+    .hero-text {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--muted);
+      line-height: 1.9;
+    }
+
+    /* =========================
+       About Section
+    ========================= */
+    .about-grid {
+      display: grid;
+      width: min(1280px, 100%);
+      grid-template-columns: minmax(300px, 390px) minmax(700px, 1fr);
+      gap: clamp(34px, 5vw, 84px);
+      align-items: center;
+    }
+
+    .profile-card,
+    .intro-panel {
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.02) 34%, rgba(3, 12, 22, 0.58) 100%),
+        radial-gradient(circle at 18% 12%, rgba(125, 211, 252, 0.2), transparent 38%),
+        rgba(10, 24, 38, 0.58);
+      border: 1px solid rgba(178, 220, 255, 0.28);
+      border-radius: var(--radius);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        inset 0 -28px 60px rgba(3, 10, 18, 0.34),
+        0 24px 80px rgba(0, 0, 0, 0.44),
+        0 0 0 1px rgba(53, 200, 255, 0.04);
+      backdrop-filter: blur(22px) saturate(1.18);
+      -webkit-backdrop-filter: blur(22px) saturate(1.18);
+    }
+
+    .profile-card {
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-card::before,
+    .intro-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(115deg, rgba(255, 255, 255, 0.18), transparent 26%),
+        radial-gradient(circle at 88% 12%, rgba(53, 200, 255, 0.16), transparent 34%);
+      opacity: 0.7;
+    }
+
+    .profile-card > *,
+    .intro-panel > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      border-radius: var(--radius);
+      border: 1px solid rgba(215, 228, 238, 0.18);
+      background:
+        linear-gradient(135deg, rgba(53, 200, 255, 0.18), rgba(215, 228, 238, 0.06)),
+        #0f1c29;
+    }
+
+    .avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0.92;
+      filter: contrast(1.06) saturate(0.96);
+    }
+
+    .profile-info {
+      padding: 18px 4px 2px;
+    }
+
+    .profile-info h3 {
+      font-size: 26px;
+      letter-spacing: 0.12em;
+      margin-bottom: 12px;
+    }
+
+    .profile-info p {
+      color: var(--muted);
+      line-height: 1.9;
+      font-size: 15px;
+    }
+
+    .intro-panel {
+      padding: clamp(38px, 5vw, 62px);
+      position: relative;
+      overflow: visible;
+      min-height: 430px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 3;
+    }
+
+    .intro-panel .section-title {
+      white-space: nowrap;
+      font-size: clamp(42px, 4.2vw, 64px);
+      letter-spacing: 0.04em;
+      margin-bottom: 28px;
+    }
+
+    .intro-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .intro-list p {
+      color: #d7e6f2;
+      line-height: 1.82;
+      font-size: 17px;
+    }
+
+    .tag-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-start;
+      padding-bottom: 96px;
+      margin-bottom: -96px;
+      position: relative;
+      z-index: 6;
+    }
+
+    .tag {
+      position: relative;
+      padding: 9px 12px;
+      border-radius: var(--radius);
+      color: var(--silver);
+      font-size: 14px;
+      cursor: default;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(53, 200, 255, 0.08)),
+        rgba(10, 25, 38, 0.56);
+      border: 1px solid rgba(178, 220, 255, 0.22);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 8px 22px rgba(0, 0, 0, 0.18);
+      transition: color 0.22s ease, background 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+    }
+
+    .tag:hover,
+    .tag:focus-visible {
+      color: #f4fbff;
+      background:
+        linear-gradient(145deg, rgba(5, 17, 28, 0.94), rgba(7, 28, 42, 0.86)),
+        rgba(3, 11, 20, 0.94);
+      border-color: rgba(125, 211, 252, 0.42);
+      transform: translateY(-2px);
+      z-index: 5;
+    }
+
+    .tag::after {
+      content: attr(data-detail);
+      position: absolute;
+      left: 0;
+      top: calc(100% + 12px);
+      width: min(440px, 72vw);
+      padding: 14px 16px;
+      color: #dcecf8;
+      font-size: 14px;
+      line-height: 1.75;
+      white-space: normal;
+      text-align: left;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(4, 15, 25, 0.84) 38%, rgba(3, 10, 18, 0.94)),
+        rgba(6, 18, 30, 0.9);
+      border: 1px solid rgba(178, 220, 255, 0.28);
+      border-radius: var(--radius);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 18px 42px rgba(0, 0, 0, 0.36),
+        0 0 28px rgba(53, 200, 255, 0.12);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition: opacity 0.22s ease, visibility 0.22s ease, transform 0.22s ease;
+      pointer-events: none;
+    }
+
+    .tag:hover::after,
+    .tag:focus-visible::after {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .pet-muyu {
+      --pet-size: clamp(82px, 8vw, 128px);
+      position: absolute;
+      width: var(--pet-size);
+      padding: 0;
+      border: 0;
+      color: inherit;
+      background: transparent;
+      cursor: pointer;
+      isolation: isolate;
+      z-index: 5;
+      -webkit-tap-highlight-color: transparent;
+      transform-origin: 52% 86%;
+    }
+
+    .pet-muyu::after {
+      content: "";
+      position: absolute;
+      inset: -30px -24px -58px -24px;
+      z-index: 4;
+      border-radius: 999px;
+    }
+
+    .pet-muyu::before {
+      content: "";
+      position: absolute;
+      left: 17%;
+      right: 8%;
+      bottom: 4%;
+      height: 19%;
+      z-index: -1;
+      border-radius: 999px;
+      background: radial-gradient(ellipse, rgba(53, 200, 255, 0.2), rgba(53, 200, 255, 0.04) 58%, transparent 74%);
+      filter: blur(9px);
+      opacity: 0.72;
+    }
+
+    .pet-muyu img {
+      display: block;
+      width: 100%;
+      height: auto;
+      pointer-events: none;
+      user-select: none;
+      transform-origin: 53% 82%;
+      filter:
+        drop-shadow(0 10px 14px rgba(0, 0, 0, 0.34))
+        drop-shadow(0 0 18px rgba(53, 200, 255, 0.18));
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .pet-muyu:hover img,
+    .pet-muyu:focus-visible img {
+      transform: translateY(-2px) rotate(-1.8deg) scale(1.03);
+      filter:
+        drop-shadow(0 12px 16px rgba(0, 0, 0, 0.38))
+        drop-shadow(0 0 24px rgba(53, 200, 255, 0.28));
+    }
+
+    .pet-muyu:focus-visible {
+      outline: 1px solid rgba(125, 211, 252, 0.62);
+      outline-offset: 6px;
+      border-radius: 999px;
+    }
+
+    .pet-muyu.is-striking img {
+      animation: petMuyuStrike 0.46s cubic-bezier(0.2, 0.8, 0.28, 1);
+    }
+
+    .pet-muyu--about {
+      right: clamp(18px, 3vw, 46px);
+      bottom: clamp(18px, 2.7vw, 36px);
+      --pet-size: clamp(92px, 9.4vw, 142px);
+    }
+
+    .pet-muyu--about::after {
+      inset: 0;
+    }
+
+
+    .pet-muyu-hint {
+      position: absolute;
+      right: clamp(24px, 3.4vw, 54px);
+      bottom: -34px;
+      z-index: 4;
+      margin: 0;
+      color: rgba(226, 241, 248, 0.42);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+      text-shadow: 0 0 16px rgba(53, 200, 255, 0.14);
+    }
+
+
+    .pet-muyu--investment {
+      top: clamp(52px, 5.6vw, 88px);
+      right: clamp(86px, 13vw, 250px);
+      --pet-size: clamp(84px, 7.2vw, 128px);
+    }
+
+    .pet-wave,
+    .pet-spark {
+      position: absolute;
+      left: 50%;
+      top: 56%;
+      pointer-events: none;
+    }
+
+    .pet-wave {
+      width: 66%;
+      aspect-ratio: 1;
+      border-radius: 999px;
+      border: 2px solid rgba(53, 200, 255, 0.72);
+      box-shadow: 0 0 24px rgba(53, 200, 255, 0.26);
+      transform: translate(-50%, -50%) scale(0.34);
+      animation: petMuyuWave 0.68s ease-out forwards;
+    }
+
+    .pet-spark {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #7dd3fc;
+      box-shadow: 0 0 12px rgba(53, 200, 255, 0.82);
+      transform: translate(-50%, -50%) scale(0.9);
+      animation: petMuyuSpark 0.72s ease-out forwards;
+    }
+
+    .pet-merit {
+      position: absolute;
+      left: 62%;
+      top: 8%;
+      z-index: 6;
+      color: #d8f6ff;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      text-shadow:
+        0 0 14px rgba(53, 200, 255, 0.68),
+        0 2px 8px rgba(0, 0, 0, 0.48);
+      pointer-events: none;
+      animation: petMeritFloat 0.92s ease-out forwards;
+    }
+
+    .pet-bubble {
+      position: absolute;
+      left: 4%;
+      top: 0;
+      z-index: 7;
+      max-width: min(260px, 48vw);
+      padding: 10px 13px;
+      color: rgba(244, 251, 255, 0.94);
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1.45;
+      white-space: nowrap;
+      border: 1px solid rgba(178, 220, 255, 0.34);
+      border-radius: 12px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(6, 24, 38, 0.7)),
+        rgba(8, 28, 44, 0.58);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 16px 34px rgba(0, 0, 0, 0.34),
+        0 0 26px rgba(53, 200, 255, 0.2);
+      backdrop-filter: blur(16px) saturate(1.18);
+      -webkit-backdrop-filter: blur(16px) saturate(1.18);
+      pointer-events: none;
+      transform: translate(-76%, -96%) scale(0.94);
+      animation: petBubbleIn 0.24s ease forwards;
+    }
+
+    .pet-bubble.is-count {
+      color: #e8fbff;
+      border-color: rgba(125, 211, 252, 0.56);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 16px 36px rgba(0, 0, 0, 0.38),
+        0 0 32px rgba(53, 200, 255, 0.38);
+    }
+
+    .pet-energy-burst {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .pet-energy-ring {
+      position: absolute;
+      left: var(--x, 50vw);
+      top: var(--y, 50vh);
+      width: 36vmax;
+      aspect-ratio: 1;
+      border-radius: 999px;
+      border: 2px solid rgba(53, 200, 255, 0.74);
+      box-shadow:
+        0 0 32px rgba(53, 200, 255, 0.44),
+        inset 0 0 36px rgba(53, 200, 255, 0.2);
+      transform: translate(-50%, -50%) scale(0.04);
+      animation: petEnergyRing 1.08s ease-out forwards;
+    }
+
+    .pet-energy-bit {
+      position: absolute;
+      left: var(--x, 50vw);
+      top: var(--y, 50vh);
+      color: rgba(125, 211, 252, 0.78);
+      font-family: Consolas, "SFMono-Regular", "Microsoft YaHei", monospace;
+      font-size: 12px;
+      text-shadow: 0 0 18px rgba(53, 200, 255, 0.72);
+      transform: translate(-50%, -50%);
+      animation: petEnergyBit 1s ease-out forwards;
+    }
+
+    @keyframes petMuyuStrike {
+      0% { transform: translateY(0) rotate(0deg) scale(1); }
+      18% { transform: translateY(8px) rotate(0deg) scale(1.03, 0.94); }
+      42% { transform: translateY(-2px) rotate(-5deg) scale(0.99, 1.02); }
+      68% { transform: translateY(1px) rotate(2deg) scale(1); }
+      100% { transform: translateY(0) rotate(0deg) scale(1); }
+    }
+
+    @keyframes petMuyuWave {
+      to {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.75);
+      }
+    }
+
+    @keyframes petMuyuSpark {
+      to {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0.16);
+      }
+    }
+
+    @keyframes petMeritFloat {
+      0% { opacity: 0; transform: translate3d(-50%, 4px, 0) scale(0.88); }
+      18% { opacity: 1; transform: translate3d(-50%, -4px, 0) scale(1); }
+      100% { opacity: 0; transform: translate3d(-50%, -36px, 0) scale(1.06); }
+    }
+
+    @keyframes petBubbleIn {
+      to {
+        opacity: 1;
+        transform: translate(-76%, -108%) scale(1);
+      }
+    }
+
+    @keyframes petEnergyRing {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.04); }
+      12% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(3.4); }
+    }
+
+    @keyframes petEnergyBit {
+      to {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--r)) scale(0.72);
+      }
+    }
+
+    /* =========================
+       Data Section
+    ========================= */
+    .data-showcase {
+      display: grid;
+      grid-template-rows: auto auto auto;
+      gap: 18px;
+      width: min(1640px, calc(100vw - 48px));
+      min-height: 0;
+    }
+
+    .explore-hint {
+      margin: 0 0 -6px 14px;
+      color: rgba(226, 241, 248, 0.44);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      line-height: 1.3;
+      user-select: none;
+    }
+
+    #data {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+
+    .showcase-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      min-height: 0;
+    }
+
+    .showcase-top .visual-tile {
+      aspect-ratio: 1.52 / 1;
+    }
+
+    .visual-tile {
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+      border-radius: var(--radius);
+      border: 1px solid rgba(178, 220, 255, 0.22);
+      background: rgba(5, 14, 24, 0.74);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 24px 70px rgba(0, 0, 0, 0.38);
+      isolation: isolate;
+      cursor: pointer;
+      transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+    }
+
+    .visual-tile:hover,
+    .visual-tile:focus-visible {
+      transform: translateY(-6px);
+      border-color: rgba(125, 211, 252, 0.58);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 30px 78px rgba(0, 0, 0, 0.46),
+        0 0 32px rgba(53, 200, 255, 0.2);
+      outline: none;
+    }
+
+    .visual-tile.wide {
+      aspect-ratio: 4.75 / 1;
+      min-height: 0;
+    }
+
+    .visual-tile img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      transform: scale(1.02);
+      filter: saturate(1.03) contrast(1.06) brightness(0.86);
+      transition: transform 0.5s ease, filter 0.35s ease;
+    }
+
+    .visual-tile:hover img,
+    .visual-tile:focus-visible img {
+      transform: scale(1.07);
+    }
+
+    .visual-tile.plain-image img {
+      position: absolute;
+      inset: 0;
+      transform: scale(1.08);
+      filter: none;
+    }
+
+    .visual-tile.plain-image:hover img,
+    .visual-tile.plain-image:focus-visible img {
+      transform: scale(1.13);
+    }
+
+    .visual-tile::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(3, 10, 18, 0.16), rgba(3, 10, 18, 0.38)),
+        radial-gradient(circle at 52% 44%, transparent 34%, rgba(3, 10, 18, 0.38) 100%);
+    }
+
+    .visual-tile.plain-image::before {
+      display: none;
+    }
+
+    .visual-tile::after {
+      content: "Explore \2192";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 3;
+      padding: 9px 13px;
+      color: #f4fbff;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      background: rgba(3, 10, 18, 0.68);
+      border: 1px solid rgba(178, 220, 255, 0.24);
+      border-radius: var(--radius);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      opacity: 0;
+      transform: translate(-50%, calc(-50% - 8px)) scale(0.96);
+      transition: opacity 0.24s ease, transform 0.24s ease;
+      pointer-events: none;
+    }
+
+    .visual-tile:hover::after,
+    .visual-tile:focus-visible::after {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .visual-caption {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: clamp(22px, 8%, 42px);
+      z-index: 2;
+      padding: 20px clamp(22px, 4vw, 44px);
+      background: linear-gradient(90deg, rgba(2, 8, 15, 0.82), rgba(5, 17, 28, 0.58), rgba(2, 8, 15, 0.18));
+      border-top: 1px solid rgba(215, 228, 238, 0.1);
+      border-bottom: 1px solid rgba(215, 228, 238, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .visual-caption.center {
+      top: 50%;
+      bottom: auto;
+      transform: translateY(-50%);
+      text-align: center;
+      background: linear-gradient(90deg, transparent, rgba(2, 8, 15, 0.72), transparent);
+    }
+
+    .visual-caption h2,
+    .visual-caption h3 {
+      color: #f4fbff;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+      text-shadow: 0 0 26px rgba(53, 200, 255, 0.26);
+    }
+
+    .visual-caption h2 {
+      font-size: clamp(46px, 5.5vw, 78px);
+    }
+
+    .visual-caption h3 {
+      font-size: clamp(30px, 3.2vw, 48px);
+    }
+
+    .visual-caption p {
+      margin-top: 8px;
+      color: rgba(238, 247, 255, 0.78);
+      font-size: clamp(14px, 1.3vw, 18px);
+      letter-spacing: 0.08em;
+      text-transform: lowercase;
+    }
+
+    .detail-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      pointer-events: none;
+      background: rgba(1, 6, 12, 0);
+      transition: background 0.22s ease;
+    }
+
+    .detail-overlay.active {
+      pointer-events: auto;
+      background: rgba(1, 6, 12, 0.58);
+    }
+
+    .detail-overlay.is-closing {
+      pointer-events: none;
+      background: rgba(1, 6, 12, 0);
+    }
+
+    .detail-panel {
+      position: fixed;
+      left: var(--start-left, 50vw);
+      top: var(--start-top, 50vh);
+      width: var(--start-width, 0px);
+      height: var(--start-height, 0px);
+      overflow: hidden;
+      opacity: 0;
+      border-radius: var(--radius);
+      border: 1px solid rgba(178, 220, 255, 0.28);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(4, 15, 25, 0.92) 34%, rgba(2, 8, 15, 0.96)),
+        rgba(5, 18, 30, 0.96);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 34px 100px rgba(0, 0, 0, 0.58),
+        0 0 42px rgba(53, 200, 255, 0.16);
+      backdrop-filter: blur(22px) saturate(1.16);
+      -webkit-backdrop-filter: blur(22px) saturate(1.16);
+      transform-origin: center;
+      will-change: left, top, width, height, opacity, transform;
+      transition:
+        left 0.34s cubic-bezier(0.2, 0.84, 0.18, 1),
+        top 0.34s cubic-bezier(0.2, 0.84, 0.18, 1),
+        width 0.34s cubic-bezier(0.2, 0.84, 0.18, 1),
+        height 0.34s cubic-bezier(0.2, 0.84, 0.18, 1),
+        opacity 0.22s ease,
+        border-radius 0.34s ease;
+    }
+
+    .detail-panel.is-open {
+      left: 4vw;
+      top: max(86px, 6vh);
+      width: 92vw;
+      height: calc(100vh - max(118px, 10vh));
+      opacity: 1;
+      border-radius: 10px;
+    }
+
+    .detail-panel.is-closing {
+      opacity: 0;
+      transform: scale(0.985);
+      pointer-events: none;
+      transition: opacity 0.16s ease, transform 0.16s ease;
+    }
+
+    .detail-panel-inner {
+      height: 100%;
+      overflow: auto;
+      padding: clamp(28px, 4vw, 54px);
+      position: relative;
+    }
+
+    .detail-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid rgba(125, 211, 252, 0.16);
+      padding-bottom: 20px;
+    }
+
+    .detail-head h2 {
+      color: #f4fbff;
+      font-size: clamp(34px, 4vw, 62px);
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+    }
+
+    .detail-head p {
+      margin-top: 10px;
+      color: rgba(215, 228, 238, 0.72);
+      letter-spacing: 0.08em;
+    }
+
+    .detail-close {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      border-radius: var(--radius);
+      border: 1px solid rgba(178, 220, 255, 0.24);
+      color: #f4fbff;
+      background: rgba(5, 16, 27, 0.72);
+      font-size: 26px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .photo-map {
+      margin: 0 calc(clamp(28px, 4vw, 54px) * -0.72) 34px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(178, 220, 255, 0.2);
+      background:
+        linear-gradient(180deg, rgba(7, 22, 35, 0.84), rgba(2, 8, 15, 0.96)),
+        radial-gradient(circle at 48% 46%, rgba(53, 200, 255, 0.18), transparent 56%);
+      overflow: hidden;
+    }
+
+    .photo-map img {
+      width: 100%;
+      height: min(76vh, 850px);
+      object-fit: contain;
+      display: block;
+    }
+
+    .gallery-item {
+      border: 0;
+      padding: 0;
+      color: inherit;
+      background: transparent;
+      cursor: zoom-in;
+      text-align: left;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      display: block;
+      border-radius: var(--radius);
+      border: 1px solid rgba(178, 220, 255, 0.2);
+      filter: contrast(1.04) saturate(1.02);
+      transition: transform 0.24s ease, border-color 0.24s ease;
+    }
+
+    .gallery-item:hover img {
+      transform: translateY(-3px);
+      border-color: rgba(125, 211, 252, 0.48);
+    }
+
+    .gallery-item span {
+      display: block;
+      margin-top: 9px;
+      color: rgba(238, 247, 255, 0.82);
+      font-size: 14px;
+    }
+
+    .investment-detail {
+      display: grid;
+      grid-template-columns: minmax(300px, 0.95fr) minmax(430px, 1.25fr);
+      gap: clamp(24px, 4vw, 54px);
+      align-items: stretch;
+    }
+
+    .detail-placeholder,
+    .bar-panel,
+    .keyword-cloud,
+    .project-list {
+      border-radius: var(--radius);
+      border: 1px solid rgba(178, 220, 255, 0.2);
+      background: rgba(4, 15, 25, 0.48);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .detail-placeholder {
+      min-height: 330px;
+      padding: clamp(24px, 3vw, 34px);
+      color: rgba(215, 228, 238, 0.78);
+      line-height: 1.9;
+    }
+
+    .detail-placeholder strong {
+      display: block;
+      margin-bottom: 16px;
+      color: #f4fbff;
+      font-size: 18px;
+      line-height: 1.75;
+    }
+
+    .bar-panel {
+      padding: clamp(24px, 3vw, 34px);
+    }
+
+    .bar-panel h3 {
+      color: #f4fbff;
+      font-size: 20px;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .bar-panel-note {
+      color: rgba(215, 228, 238, 0.58);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .bar-chart {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bar {
+      display: grid;
+      grid-template-columns: minmax(92px, 132px) minmax(120px, 1fr) 34px;
+      align-items: center;
+      gap: 12px;
+      color: rgba(238, 247, 255, 0.84);
+      font-size: 14px;
+    }
+
+    .bar-track {
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(125, 211, 252, 0.08);
+      border: 1px solid rgba(125, 211, 252, 0.14);
+      overflow: hidden;
+    }
+
+    .bar-track span {
+      display: block;
+      width: var(--w, 20%);
+      content: "";
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(53, 200, 255, 0.28), rgba(53, 200, 255, 0.86));
+      border: 1px solid rgba(178, 220, 255, 0.24);
+      box-shadow: 0 0 18px rgba(53, 200, 255, 0.28);
+    }
+
+    .bar-count {
+      color: var(--main-soft);
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .keyword-cloud {
+      position: relative;
+      height: 470px;
+      padding: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(53, 200, 255, 0.14), transparent 52%),
+        linear-gradient(180deg, rgba(4, 15, 25, 0.5), rgba(1, 7, 13, 0.6));
+      isolation: isolate;
+    }
+
+    .keyword-cloud::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(125, 211, 252, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(125, 211, 252, 0.045) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at 50% 50%, black, transparent 78%);
+      z-index: -1;
+    }
+
+    .keyword-cloud span {
+      position: absolute;
+      left: var(--x, 50%);
+      top: var(--y, 50%);
+      color: rgba(238, 247, 255, 0.84);
+      font-size: var(--s, 20px);
+      font-weight: var(--fw, 600);
+      opacity: var(--o, 0.82);
+      line-height: 1;
+      white-space: nowrap;
+      transform: translate(-50%, -50%) rotate(var(--r, 0deg));
+      color: var(--c, rgba(238, 247, 255, 0.84));
+      text-shadow:
+        0 0 18px rgba(53, 200, 255, 0.28),
+        0 0 42px rgba(53, 200, 255, 0.14);
+    }
+
+    .project-list {
+      margin-top: 18px;
+      padding: 24px;
+      color: rgba(215, 228, 238, 0.84);
+      line-height: 1.9;
+    }
+
+    .project-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 18px;
+      list-style: none;
+    }
+
+    .project-list li {
+      padding: 22px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(125, 211, 252, 0.16);
+      background: rgba(2, 11, 22, 0.34);
+    }
+
+    .project-list h3 {
+      color: #f4fbff;
+      font-size: 18px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .project-list p {
+      color: rgba(215, 228, 238, 0.76);
+      line-height: 1.85;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      place-items: center;
+      padding: 32px;
+      background: rgba(1, 6, 12, 0.78);
+      cursor: zoom-out;
+    }
+
+    .lightbox.active {
+      display: grid;
+    }
+
+    .lightbox img {
+      max-width: min(92vw, 1280px);
+      max-height: 86vh;
+      border-radius: var(--radius);
+      box-shadow: 0 34px 100px rgba(0, 0, 0, 0.6);
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    /* =========================
+       响应式适配
+    ========================= */
+    @media (max-width: 860px) {
+      .nav-inner {
+        width: min(100% - 28px, 1180px);
+      }
+
+      .brand {
+        font-size: 14px;
+      }
+
+      .nav-links a {
+        padding: 9px 10px;
+        font-size: 13px;
+      }
+
+      .about-grid,
+      .showcase-top {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-card {
+        max-width: 390px;
+        margin: 0 auto;
+      }
+
+      .data-showcase {
+        grid-template-rows: auto auto auto;
+      }
+
+      .pet-muyu--about {
+        right: 18px;
+        bottom: 22px;
+        --pet-size: 96px;
+      }
+
+      .pet-muyu--investment {
+        top: 56px;
+        right: 76px;
+        --pet-size: 86px;
+      }
+
+      .pet-muyu-hint {
+        right: 22px;
+        bottom: -28px;
+        font-size: 12px;
+      }
+
+
+      .visual-tile,
+      .visual-tile.wide {
+        aspect-ratio: auto;
+        min-height: 260px;
+      }
+
+      .detail-panel.is-open {
+        left: 18px;
+        top: 78px;
+        width: calc(100vw - 36px);
+        height: calc(100vh - 100px);
+      }
+
+      .gallery-grid,
+      .investment-detail,
+      .project-list {
+        grid-template-columns: 1fr;
+      }
+
+      .bar {
+        grid-template-columns: minmax(88px, 120px) minmax(110px, 1fr) 30px;
+      }
+    }
+
+    @media (min-width: 861px) and (max-width: 1180px) {
+      .about-grid {
+        grid-template-columns: minmax(280px, 360px) minmax(560px, 1fr);
+        gap: clamp(28px, 4vw, 52px);
+      }
+
+      .intro-panel .section-title {
+        font-size: clamp(34px, 4.4vw, 48px);
+      }
+    }
+
+    @media (max-width: 560px) {
+      :root {
+        --nav-h: 62px;
+      }
+
+      section {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .nav-inner {
+        gap: 10px;
+      }
+
+      .brand {
+        max-width: 92px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .nav-links {
+        gap: 2px;
+      }
+
+      .nav-links a {
+        padding: 8px 7px;
+      }
+
+      .hero-title {
+        font-size: clamp(24px, 8vw, 36px);
+        letter-spacing: 0.02em;
+      }
+
+      .hero-subtitle,
+      .section-title {
+        letter-spacing: 0.06em;
+      }
+
+      .camera-sketch {
+        right: -30px;
+        top: 74px;
+        opacity: 0.46;
+      }
+
+      .visual-caption {
+        padding: 16px 18px;
+      }
+
+      .visual-caption h2 {
+        font-size: 38px;
+      }
+
+      .visual-caption h3 {
+        font-size: 26px;
+      }
+
+      .detail-panel-inner {
+        padding: 22px;
+      }
+
+      .pet-muyu--about {
+        right: 14px;
+        bottom: 16px;
+        --pet-size: 78px;
+      }
+
+      .pet-muyu--investment {
+        top: 70px;
+        right: 22px;
+        --pet-size: 74px;
+      }
+
+      .pet-muyu-hint {
+        right: 16px;
+        bottom: -24px;
+        font-size: 11px;
+      }
+
+
+      .detail-head {
+        gap: 14px;
+      }
+
+      .detail-head h2 {
+        font-size: 30px;
+      }
+
+      .gallery-grid {
+        gap: 14px;
+      }
+
+      .keyword-cloud {
+        height: 520px;
+      }
+
+      .keyword-cloud span {
+        font-size: min(var(--s), 46px);
+      }
+
+      .bar {
+        grid-template-columns: 1fr 34px;
+        gap: 7px 10px;
+      }
+
+      .bar > span:first-child {
+        grid-column: 1 / 2;
+      }
+
+      .bar-track {
+        grid-column: 1 / -1;
+      }
+
+      .bar-count {
+        grid-column: 2 / 3;
+        grid-row: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航：href 对应下方 section 的 id，可继续增减导航项 -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a class="brand" href="#home"><span>pk</span> 数据小馆</a>
+      <div class="nav-links" aria-label="页面导航">
+        <a href="#home" class="active">首页</a>
+        <a href="#about">关于我</a>
+        <a href="#data">数据小馆</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="bg-slider" aria-hidden="true">
+        <div class="bg-slide"></div>
+        <div class="bg-slide"></div>
+        <div class="bg-slide"></div>
+      </div>
+      <div class="hero-visuals" aria-hidden="true">
+        <span class="kline-candle up" style="--x: 8%; --y: 22%; --h: 96px; --body: 30px; --body-y: 28px; --d: 13s; --delay: -1s; --o: 0.48;"></span>
+        <span class="kline-candle down" style="--x: 17%; --y: 58%; --h: 74px; --body: 24px; --body-y: 18px; --d: 15s; --delay: -6s; --o: 0.42;"></span>
+        <span class="kline-candle up" style="--x: 29%; --y: 16%; --h: 118px; --body: 38px; --body-y: 42px; --d: 17s; --delay: -9s; --o: 0.46;"></span>
+        <span class="kline-candle down" style="--x: 43%; --y: 68%; --h: 88px; --body: 28px; --body-y: 34px; --d: 14s; --delay: -4s; --o: 0.38;"></span>
+        <span class="kline-candle up" style="--x: 58%; --y: 20%; --h: 104px; --body: 34px; --body-y: 46px; --d: 16s; --delay: -12s; --o: 0.44;"></span>
+        <span class="kline-candle down" style="--x: 71%; --y: 62%; --h: 70px; --body: 22px; --body-y: 22px; --d: 12s; --delay: -7s; --o: 0.36;"></span>
+        <span class="kline-candle up" style="--x: 84%; --y: 30%; --h: 130px; --body: 42px; --body-y: 52px; --d: 18s; --delay: -3s; --o: 0.42;"></span>
+
+        <span class="code-stream" style="--top: 14%; --left: 2%; --dur: 18s; --delay: -2s; --alpha: 0.24;">for frame in light: detect(edge, signal)</span>
+        <span class="code-stream" style="--top: 27%; --left: 54%; --dur: 22s; --delay: -11s; --alpha: 0.2;">market.observe(kline).filter(value)</span>
+        <span class="code-stream" style="--top: 76%; --left: 18%; --dur: 20s; --delay: -7s; --alpha: 0.24;">cv::Mat vision = camera.capture();</span>
+        <span class="code-stream" style="--top: 21%; --left: 74%; --dur: 24s; --delay: -16s; --alpha: 0.18;">model = torch.nn.Sequential(backbone, head)</span>
+        <span class="code-stream" style="--top: 43%; --left: 6%; --dur: 21s; --delay: -13s; --alpha: 0.2;">loss = criterion(logits, labels)</span>
+        <span class="code-stream" style="--top: 54%; --left: 70%; --dur: 19s; --delay: -4s; --alpha: 0.22;">optimizer.zero_grad(); loss.backward()</span>
+        <span class="code-stream" style="--top: 66%; --left: 48%; --dur: 23s; --delay: -18s; --alpha: 0.18;">features = encoder(images).flatten(1)</span>
+        <span class="code-stream" style="--top: 84%; --left: 4%; --dur: 26s; --delay: -9s; --alpha: 0.2;">with torch.no_grad(): pred = net(x).softmax(-1)</span>
+        <span class="code-stream" style="--top: 9%; --left: 38%; --dur: 25s; --delay: -21s; --alpha: 0.16;">aug = transforms.RandomResizedCrop(224)</span>
+
+        <div class="camera-sketch">
+          <img src="./assets/camera-right-cutout-clean.png" alt="" />
+        </div>
+        <div class="stereo-camera">
+          <img src="./assets/camera-left-cutout-clean.png" alt="" />
+        </div>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">代码、光影、K线之间</h1>
+        <p class="hero-subtitle">一个工科生的数据小馆</p>
+        <div class="hero-line"></div>
+        <p class="hero-text">用代码理解系统，用镜头记录光影，用数据观察市场。</p>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+      <div class="section-inner about-grid">
+        <aside class="profile-card">
+          <div class="avatar-wrap">
+            <img src="./assets/自我介绍图.png" alt="pk 的自我介绍插画" />
+          </div>
+          <div class="profile-info">
+            <h3>pk</h3>
+            <p>上海交通大学</p>
+            <p>智能感知工程</p>
+            <p>2027届本科生</p>
+          </div>
+        </aside>
+
+        <div class="intro-panel">
+          <p class="section-kicker">About Me</p>
+          <h2 class="section-title">一个工科生的三种视角</h2>
+          <div class="intro-list">
+            <p>作为一名智能感知工程的本科生，</p>
+            <p>工科学习让我学会了从基础的信号处理到前沿的 AI 模型等各种知识；</p>
+            <p>摄影让我积累对光影、美景和决定性瞬间的敏感性；</p>
+            <p>投资研究则让我用理性的眼光观察企业、行业和市场。</p>
+          </div>
+          <div class="tag-grid" aria-label="个人标签">
+            <span class="tag" tabindex="0" data-detail="遥感目标检测识别、机械臂视觉抓取、大数据分析、ROS2 多车协同、电赛控制类题目等项目经历">智能感知</span>
+            <span class="tag" tabindex="0" data-detail="视觉中国签约摄影师，上海交通大学摄影协会成员，有三年摄影经验，爱好风光摄影、星空摄影等多种题材">风光摄影</span>
+            <span class="tag" tabindex="0" data-detail="两年投资经历，以格雷厄姆的经典价值投资思想为起点，看重商业模式、估值、现金流、分红回购。">价值投资</span>
+          </div>
+          <button class="pet-muyu pet-muyu--about" type="button" aria-label="位置1宠物木鱼，点击敲击" data-pet-name="位置1">
+            <img src="./assets/pet-transparent.png" alt="" aria-hidden="true" draggable="false" />
+          </button>
+          <p class="pet-muyu-hint" aria-hidden="true">这个木鱼可以敲击</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data Section -->
+    <section id="data">
+      <div class="section-inner data-showcase">
+        <p class="explore-hint">点击卡片进一步探索</p>
+        <div class="showcase-top">
+          <article class="visual-tile" tabindex="0" role="button" data-detail="photo" aria-label="打开摄影作品集详情">
+            <img src="./assets/photograph_1.jpg" alt="风光摄影主题视觉" />
+            <div class="visual-caption">
+              <h3>用镜头记录世界</h3>
+              <p>to discover beauty</p>
+            </div>
+          </article>
+
+          <article class="visual-tile plain-image" tabindex="0" role="button" data-detail="investment" aria-label="打开投资研究详情">
+            <img src="./assets/investment.png" alt="投资研究主题视觉" />
+          </article>
+        </div>
+
+        <article class="visual-tile wide" tabindex="0" role="button" data-detail="perception" aria-label="打开智能感知详情">
+          <img src="./assets/perception-banner.png" alt="智能感知与视觉算法主题视觉" />
+          <div class="visual-caption center">
+            <h2>智能感知</h2>
+            <p>Perception · Detection · Vision</p>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <div class="detail-overlay" id="detailOverlay" aria-hidden="true">
+    <section class="detail-panel" id="detailPanel" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="detail-panel-inner" id="detailContent"></div>
+    </section>
+  </div>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <img src="" alt="" id="lightboxImage" />
+  </div>
+
+  <script>
+    /* =========================
+       导航高亮：根据滚动位置更新 active 状态
+    ========================= */
+    const sections = document.querySelectorAll("section[id]");
+    const navLinks = document.querySelectorAll(".nav-links a");
+
+    function updateActiveNav() {
+      const scrollY = window.scrollY + window.innerHeight * 0.35;
+
+      sections.forEach((section) => {
+        const top = section.offsetTop;
+        const bottom = top + section.offsetHeight;
+        const id = section.getAttribute("id");
+
+        if (scrollY >= top && scrollY < bottom) {
+          navLinks.forEach((link) => {
+            link.classList.toggle("active", link.getAttribute("href") === `#${id}`);
+          });
+        }
+      });
+    }
+
+    window.addEventListener("scroll", updateActiveNav);
+    updateActiveNav();
+
+    const detailOverlay = document.getElementById("detailOverlay");
+    const detailPanel = document.getElementById("detailPanel");
+    const detailContent = document.getElementById("detailContent");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImage = document.getElementById("lightboxImage");
+
+    const photoWorks = [
+      { title: "雪岭待行", preview: "./assets/previews/潘科_雪岭待行.jpg", full: "./assets/潘科_雪岭待行.jpg" },
+      { title: "鹭影浮白", preview: "./assets/previews/潘科_鹭影浮白.jpg", full: "./assets/潘科_鹭影浮白.png" },
+      { title: "蓝岸", preview: "./assets/previews/潘科_蓝岸.jpg", full: "./assets/潘科_蓝岸.jpg" },
+      { title: "山海之间", preview: "./assets/previews/潘科_山海之间.jpg", full: "./assets/潘科_山海之间.jpg" },
+      { title: "m42星云", preview: "./assets/previews/潘科_m42星云.jpg", full: "./assets/潘科_m42星云.jpg" },
+      { title: "空间站凌月", preview: "./assets/previews/潘科_空间站凌月.jpg", full: "./assets/潘科_空间站凌月.jpg" },
+      { title: "流动星空", preview: "./assets/previews/潘科_流动星空.jpg", full: "./assets/潘科_流动星空.jpg" },
+      { title: "木星", preview: "./assets/previews/潘科_木星.jpg", full: "./assets/潘科_木星.jpg" },
+      { title: "向山路", preview: "./assets/previews/潘科_向山路.jpg", full: "./assets/潘科_向山路.jpg" },
+      { title: "夜海守望", preview: "./assets/previews/潘科_夜海守望.jpg", full: "./assets/潘科_夜海守望.jpg" },
+      { title: "寒枝(1)", preview: "./assets/previews/潘科_寒枝(1).jpg", full: "./assets/潘科_寒枝(1).jpg" },
+      { title: "寒枝(2)", preview: "./assets/previews/潘科_寒枝(2).jpg", full: "./assets/潘科_寒枝(2).jpg" },
+      { title: "晨牧", preview: "./assets/previews/潘科_晨牧.jpg", full: "./assets/潘科_晨牧.jpg" },
+      { title: "牧人", preview: "./assets/previews/潘科_牧人.jpg", full: "./assets/潘科_牧人.jpg" },
+      { title: "金林", preview: "./assets/previews/潘科_金林.jpg", full: "./assets/潘科_金林.jpg" },
+      { title: "雪岭行旅", preview: "./assets/previews/潘科_雪岭行旅.jpg", full: "./assets/潘科_雪岭行旅.jpg" },
+      { title: "雪溪入村", preview: "./assets/previews/潘科_雪溪入村.jpg", full: "./assets/潘科_雪溪入村.jpg" },
+      { title: "霜隐", preview: "./assets/previews/潘科_霜隐.jpg", full: "./assets/潘科_霜隐.jpg" },
+    ];
+
+    const investmentIndustries = [
+      { industry: "电子半导体", count: 10 },
+      { industry: "新能源制造", count: 11 },
+      { industry: "消费", count: 15 },
+      { industry: "资源材料", count: 10 },
+      { industry: "医药医疗", count: 9 },
+      { industry: "计算机软件", count: 3 },
+      { industry: "地产物业", count: 9 },
+      { industry: "通信", count: 5 },
+      { industry: "军工航天", count: 5 },
+      { industry: "出行服务", count: 5 },
+      { industry: "互联网平台", count: 4 },
+      { industry: "农林牧渔", count: 4 },
+      { industry: "金融", count: 9 },
+      { industry: "公用事业", count: 8 },
+      { industry: "商品期货", count: 1 },
+    ];
+
+    const maxIndustryCount = Math.max(...investmentIndustries.map((item) => item.count));
+
+    const sensingWordCloud = [
+      { text: "PyTorch", weight: 95 },
+      { text: "YOLO", weight: 95 },
+      { text: "目标检测", weight: 92 },
+      { text: "图像处理", weight: 88 },
+      { text: "遥感影像", weight: 86 },
+      { text: "ROS2", weight: 84 },
+      { text: "PX4", weight: 78 },
+      { text: "Gazebo", weight: 72 },
+      { text: "视觉识别", weight: 82 },
+      { text: "K230", weight: 76 },
+      { text: "PID控制", weight: 74 },
+      { text: "嵌入式视觉", weight: 76 },
+      { text: "信号处理", weight: 80 },
+      { text: "调理电路", weight: 72 },
+      { text: "ADC采样", weight: 70 },
+      { text: "血压测量", weight: 68 },
+      { text: "Qlib", weight: 76 },
+      { text: "LightGBM", weight: 72 },
+      { text: "Alpha158", weight: 68 },
+      { text: "因子建模", weight: 74 },
+      { text: "回测分析", weight: 70 },
+      { text: "Spark", weight: 76 },
+      { text: "Hive", weight: 70 },
+      { text: "MLlib", weight: 68 },
+      { text: "KMeans", weight: 64 },
+      { text: "ALS推荐", weight: 64 },
+      { text: "Random Forest", weight: 66 },
+      { text: "mAP", weight: 70 },
+      { text: "Recall", weight: 68 },
+      { text: "Precision", weight: 66 },
+      { text: "特征金字塔", weight: 60 },
+      { text: "多尺度预测", weight: 58 },
+      { text: "闭环控制", weight: 66 },
+    ];
+
+    const sensingProjects = [
+      {
+        title: "遥感图像目标检测项目｜基于 PyTorch / YOLO 的深度学习实验",
+        body: "基于 PyTorch 与 YOLO 系列框架完成遥感图像目标检测任务，覆盖数据标注格式处理、图像预处理、模型训练、验证测试、推理可视化与检测结果分析。重点关注小目标、复杂背景、类别不均衡和尺度差异问题，并使用 Precision、Recall、mAP 等指标评估模型性能。",
+      },
+      {
+        title: "量化研究项目｜基于 Qlib 的机器学习 Alpha 建模与回测实验",
+        body: "基于 Microsoft Qlib 搭建 A 股机器学习量化流程，覆盖因子构建、label 设计、模型训练、预测信号生成、TopKDropout 组合决策与回测分析。以 LightGBM + Alpha158 + CSI300 为 baseline，引入动量、52 周高点、Amihud 非流动性、成交量调整动量等因子，完成控制变量实验与因子消融分析。",
+      },
+      {
+        title: "全国大学生电子设计竞赛｜自动寻迹小车与目标瞄准系统",
+        body: "负责 K230 视觉模块开发，完成图像采集、视觉识别、目标定位与控制指令输出，并参与小车巡线、云台瞄准和多模块系统联调。围绕视觉感知、目标坐标估计和 PID 控制建立模块接口，完成感知模块与控制模块之间的数据流设计和参数调试。",
+      },
+      {
+        title: "示波法血压测量课题｜调理电路设计与采样信号处理",
+        body: "围绕袖带式示波法血压测量任务，主要负责前端调理电路设计、焊接与硬件调试，同时参与 ADC 转换后的信号处理算法设计。工作内容包括压力信号采集、滤波去噪、静压与动脉波成分分析，以及后续血压特征提取流程的实现。",
+      },
+    ];
+
+    const cloudPlacements = [
+      { x: 50, y: 48, r: 0 },
+      { x: 50, y: 30, r: 0 },
+      { x: 50, y: 68, r: 0 },
+      { x: 31, y: 60, r: -4 },
+      { x: 29, y: 36, r: -6 },
+      { x: 65, y: 69, r: 3 },
+      { x: 66, y: 31, r: 4 },
+      { x: 44, y: 81, r: 1 },
+      { x: 76, y: 47, r: 6 },
+      { x: 76, y: 24, r: 2 },
+      { x: 20, y: 27, r: 3 },
+      { x: 17, y: 47, r: -2 },
+      { x: 18, y: 66, r: 2 },
+      { x: 84, y: 66, r: -2 },
+      { x: 85, y: 35, r: 4 },
+      { x: 58, y: 17, r: -3 },
+      { x: 38, y: 17, r: 2 },
+      { x: 67, y: 15, r: 3 },
+      { x: 32, y: 77, r: -4 },
+      { x: 74, y: 78, r: 2 },
+      { x: 12, y: 18, r: 4 },
+      { x: 11, y: 75, r: -4 },
+      { x: 91, y: 19, r: -3 },
+      { x: 92, y: 78, r: 4 },
+      { x: 25, y: 86, r: 2 },
+      { x: 82, y: 86, r: -4 },
+      { x: 58, y: 88, r: 0 },
+      { x: 22, y: 12, r: -2 },
+      { x: 80, y: 12, r: 2 },
+      { x: 9, y: 58, r: -3 },
+      { x: 92, y: 55, r: 3 },
+      { x: 42, y: 10, r: -4 },
+      { x: 61, y: 9, r: 3 },
+    ];
+
+    const sortedSensingWordCloud = [...sensingWordCloud].sort((a, b) => {
+      const tieBreakers = { YOLO: 3, "目标检测": 2, PyTorch: 1 };
+      return (b.weight - a.weight) || ((tieBreakers[b.text] || 0) - (tieBreakers[a.text] || 0));
+    });
+
+    function renderSensingWordCloud() {
+      const colors = ["#f4fbff", "#35c8ff", "#7dd3fc", "#18e0c5", "#63aaff"];
+
+      return sortedSensingWordCloud.map((word, index) => {
+        const placement = cloudPlacements[index] || { x: 50, y: 50, r: 0 };
+        const normalized = (word.weight - 58) / 37;
+        const size = 16 + Math.pow(Math.max(normalized, 0), 1.28) * 68;
+        const opacity = 0.62 + Math.max(normalized, 0) * 0.34;
+        const weight = word.weight >= 86 ? 800 : word.weight >= 74 ? 700 : 600;
+        const color = colors[index % colors.length];
+
+        return `<span style="--x: ${placement.x}%; --y: ${placement.y}%; --r: ${placement.r}deg; --s: ${size.toFixed(1)}px; --o: ${opacity.toFixed(2)}; --fw: ${weight}; --c: ${color};">${word.text}</span>`;
+      }).join("");
+    }
+
+    const detailTemplates = {
+      photo: `
+        <figure class="photo-map">
+          <img src="./assets/map.png" alt="旅行足迹图" loading="lazy" decoding="async" />
+        </figure>
+        <div class="detail-head">
+          <div>
+            <h2 id="detailTitle">我拍到了......</h2>
+            <p>Landscape · Light · Moment</p>
+          </div>
+          <button class="detail-close" type="button" aria-label="关闭详情">×</button>
+        </div>
+        <div class="gallery-grid">
+          ${photoWorks.map((work) => `
+            <button class="gallery-item" type="button" data-full="${work.full}">
+              <img src="${work.preview}" alt="${work.title}" loading="lazy" decoding="async" />
+              <span>${work.title}</span>
+            </button>
+          `).join("")}
+        </div>
+      `,
+      investment: `
+        <div class="detail-head">
+          <div>
+            <h2 id="detailTitle">我的选股策略</h2>
+            <p>Business · Valuation · Cash Flow</p>
+          </div>
+          <button class="detail-close" type="button" aria-label="关闭详情">×</button>
+        </div>
+        <button class="pet-muyu pet-muyu--investment" type="button" aria-label="位置2宠物木鱼，点击敲击" data-pet-name="位置2">
+          <img src="./assets/pet-transparent.png" alt="" aria-hidden="true" draggable="false" />
+        </button>
+        <div class="investment-detail">
+          <div class="detail-placeholder">
+            <strong>一看商业模式，二看估值，三看利润、负债、现金流，最后看股东回报与管理层文化。</strong>
+            <p>具体而言，我会优先选择低资本开支、弱周期、弱竞争甚至垄断且具备定价权的企业；</p>
+            <p>再结合估值水平判断安全边际，避免在景气高点支付过高价格；</p>
+            <p>财务上重点观察利润质量、负债压力和自由现金流，判断企业是否真正具备持续造血能力；</p>
+            <p>最后通过分红、注销型回购的总金额除以市值，计算出股东回报率，评估利润能否穿透到股东手中；</p>
+            <p>管理层是否真诚、是否真正重视小股东利益也是重要的影响因素。</p>
+          </div>
+          <div class="bar-panel">
+            <h3>行业分布</h3>
+            <p class="bar-panel-note">投资或重点研究过的标的所属行业分布</p>
+            <div class="bar-chart" aria-label="投资或重点研究过的标的所属行业分布图">
+              ${investmentIndustries.map((item) => `
+                <div class="bar" style="--w: ${(item.count / maxIndustryCount * 100).toFixed(1)}%;">
+                  <span>${item.industry}</span>
+                  <div class="bar-track" aria-hidden="true"><span></span></div>
+                  <span class="bar-count">${item.count}</span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        </div>
+      `,
+      perception: `
+        <div class="detail-head">
+          <div>
+            <h2 id="detailTitle">我的项目经历</h2>
+            <p>Perception · Detection · Vision</p>
+          </div>
+          <button class="detail-close" type="button" aria-label="关闭详情">×</button>
+        </div>
+        <div class="keyword-cloud" aria-label="项目关键词词云">
+          ${renderSensingWordCloud()}
+        </div>
+        <ul class="project-list">
+          ${sensingProjects.map((project) => `
+            <li>
+              <h3>${project.title}</h3>
+              <p>${project.body}</p>
+            </li>
+          `).join("")}
+        </ul>
+      `
+    };
+
+    function openDetail(tile) {
+      const detailKey = tile.dataset.detail;
+      const rect = tile.getBoundingClientRect();
+
+      detailPanel.classList.remove("is-closing");
+      detailOverlay.classList.remove("is-closing");
+      detailContent.innerHTML = detailTemplates[detailKey] || "";
+      detailPanel.style.setProperty("--start-left", `${rect.left}px`);
+      detailPanel.style.setProperty("--start-top", `${rect.top}px`);
+      detailPanel.style.setProperty("--start-width", `${rect.width}px`);
+      detailPanel.style.setProperty("--start-height", `${rect.height}px`);
+
+      detailOverlay.classList.add("active");
+      detailOverlay.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+
+      requestAnimationFrame(() => {
+        detailPanel.classList.add("is-open");
+        const closeButton = detailContent.querySelector(".detail-close");
+        if (closeButton) closeButton.focus({ preventScroll: true });
+      });
+    }
+
+    function closeDetail() {
+      if (detailPanel.classList.contains("is-closing")) return;
+
+      detailPanel.classList.add("is-closing");
+      detailOverlay.classList.add("is-closing");
+
+      window.setTimeout(() => {
+        detailPanel.classList.remove("is-open", "is-closing");
+        detailOverlay.classList.remove("active");
+        detailOverlay.classList.remove("is-closing");
+        detailOverlay.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("modal-open");
+        detailContent.innerHTML = "";
+      }, 180);
+    }
+
+    const petMuyuStorageKey = "pkPetMuyuStrikeCount";
+    const investmentPetQuips = [
+      "套牢了就说我是价值投资",
+      "可恶，又踏空了",
+      "这波不是亏，是回撤",
+      "今天也在等均值回归",
+      "这不是追高，是确认趋势",
+    ];
+    let investmentPetQuipIndex = 0;
+    let petMuyuStrikeCount = 0;
+
+    try {
+      petMuyuStrikeCount = Number.parseInt(localStorage.getItem(petMuyuStorageKey) || "0", 10) || 0;
+    } catch (error) {
+      petMuyuStrikeCount = 0;
+    }
+
+    function savePetMuyuCount() {
+      try {
+        localStorage.setItem(petMuyuStorageKey, String(petMuyuStrikeCount));
+      } catch (error) {
+        // Keep the in-memory counter working if browser storage is unavailable.
+      }
+    }
+
+    function showPetBubble(pet, message, isCountBubble = false) {
+      const currentBubble = pet.querySelector(".pet-bubble");
+      if (currentBubble?.classList.contains("is-count") && !isCountBubble) return;
+
+      window.clearTimeout(pet.petBubbleTimer);
+      currentBubble?.remove();
+
+      const bubble = document.createElement("span");
+      bubble.className = `pet-bubble${isCountBubble ? " is-count" : ""}`;
+      bubble.textContent = message;
+      bubble.setAttribute("aria-hidden", "true");
+      pet.appendChild(bubble);
+
+      pet.petBubbleTimer = window.setTimeout(() => {
+        bubble.remove();
+      }, 3000);
+    }
+
+    function showPetMerit(pet) {
+      const merit = document.createElement("span");
+      merit.className = "pet-merit";
+      merit.textContent = "功德+1";
+      merit.setAttribute("aria-hidden", "true");
+      pet.appendChild(merit);
+      merit.addEventListener("animationend", () => merit.remove(), { once: true });
+    }
+
+    function triggerPetEnergyBurst(pet) {
+      const rect = pet.getBoundingClientRect();
+      const centerX = rect.left + rect.width * 0.52;
+      const centerY = rect.top + rect.height * 0.56;
+      const burst = document.createElement("div");
+      burst.className = "pet-energy-burst";
+      burst.setAttribute("aria-hidden", "true");
+      burst.style.setProperty("--x", `${centerX}px`);
+      burst.style.setProperty("--y", `${centerY}px`);
+
+      const ring = document.createElement("span");
+      ring.className = "pet-energy-ring";
+      burst.appendChild(ring);
+
+      const tokens = ["01", "10", "AI", "ROI", "px", "Δ", "fn", "{}"];
+      for (let index = 0; index < 30; index += 1) {
+        const bit = document.createElement("span");
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 140 + Math.random() * Math.max(window.innerWidth, window.innerHeight) * 0.72;
+        bit.className = "pet-energy-bit";
+        bit.textContent = tokens[index % tokens.length];
+        bit.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+        bit.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
+        bit.style.setProperty("--r", `${Math.random() * 120 - 60}deg`);
+        burst.appendChild(bit);
+      }
+
+      document.body.appendChild(burst);
+      window.setTimeout(() => burst.remove(), 1200);
+    }
+
+    function showPetContextBubble(pet) {
+      if (pet.classList.contains("pet-muyu--about")) {
+        showPetBubble(pet, "鼠标放在标签上试试");
+        return;
+      }
+
+      const message = investmentPetQuips[investmentPetQuipIndex % investmentPetQuips.length];
+      investmentPetQuipIndex += 1;
+      showPetBubble(pet, message);
+    }
+
+    function strikePetMuyu(pet) {
+      window.clearTimeout(pet.petStrikeTimer);
+      pet.classList.remove("is-striking");
+      void pet.offsetWidth;
+      pet.classList.add("is-striking");
+      pet.petStrikeTimer = window.setTimeout(() => pet.classList.remove("is-striking"), 470);
+
+      const wave = document.createElement("span");
+      wave.className = "pet-wave";
+      wave.setAttribute("aria-hidden", "true");
+      pet.appendChild(wave);
+      wave.addEventListener("animationend", () => wave.remove(), { once: true });
+
+      const particleCount = 3 + Math.floor(Math.random() * 3);
+      for (let index = 0; index < particleCount; index += 1) {
+        const spark = document.createElement("span");
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 28 + Math.random() * 34;
+        spark.className = "pet-spark";
+        spark.setAttribute("aria-hidden", "true");
+        spark.style.setProperty("--x", `${Math.cos(angle) * distance}px`);
+        spark.style.setProperty("--y", `${Math.sin(angle) * distance}px`);
+        pet.appendChild(spark);
+        spark.addEventListener("animationend", () => spark.remove(), { once: true });
+      }
+
+      showPetMerit(pet);
+      petMuyuStrikeCount += 1;
+      savePetMuyuCount();
+
+      if (petMuyuStrikeCount % 10 === 0) {
+        triggerPetEnergyBurst(pet);
+        showPetBubble(pet, `已敲击 ${petMuyuStrikeCount} 次`, true);
+      } else {
+        showPetContextBubble(pet);
+      }
+    }
+
+    document.addEventListener("click", (event) => {
+      const pet = event.target?.closest?.(".pet-muyu");
+      if (!pet) return;
+      event.preventDefault();
+      event.stopPropagation();
+      strikePetMuyu(pet);
+    }, true);
+
+    document.querySelectorAll(".visual-tile[data-detail]").forEach((tile) => {
+      tile.addEventListener("click", () => openDetail(tile));
+      tile.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openDetail(tile);
+        }
+      });
+    });
+
+    detailOverlay.addEventListener("click", (event) => {
+      if (event.target === detailOverlay || event.target.closest(".detail-close")) {
+        closeDetail();
+      }
+    });
+
+    detailContent.addEventListener("click", (event) => {
+      const galleryItem = event.target.closest(".gallery-item");
+      if (!galleryItem) return;
+      lightboxImage.src = galleryItem.dataset.full;
+      lightboxImage.alt = galleryItem.querySelector("img")?.alt || "摄影作品大图";
+      lightbox.classList.add("active");
+      lightbox.setAttribute("aria-hidden", "false");
+    });
+
+    lightbox.addEventListener("click", () => {
+      lightbox.classList.remove("active");
+      lightbox.setAttribute("aria-hidden", "true");
+      lightboxImage.src = "";
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        if (lightbox.classList.contains("active")) {
+          lightbox.click();
+        } else if (detailOverlay.classList.contains("active")) {
+          closeDetail();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
